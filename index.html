@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#15382d" />
+    <title data-i18n="documentTitle">Talabat Code Station | محطة طلبات للأكواد</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Talabat" data-i18n-aria-label="brandLabel">
+          <span class="brand-mark">T</span>
+          <span class="brand-name">Talabat</span>
+        </a>
+        <div class="topbar-meta">
+          <span class="live-dot"></span>
+          <span data-i18n="catalogLabel">كتالوج المنتجات</span>
+          <span class="meta-divider"></span>
+          <span id="product-count" data-i18n="loadingProducts">جارٍ تحميل الأصناف...</span>
+        </div>
+        <div class="header-actions">
+          <button id="language-toggle" class="language-toggle" type="button" data-i18n-aria-label="languageButtonLabel" aria-label="Switch to English">EN</button>
+          <div class="menu-wrap">
+            <button id="menu-toggle" class="menu-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="floating-menu" data-i18n-aria-label="menuButtonLabel" aria-label="فتح القائمة">
+              <span></span><span></span><span></span>
+            </button>
+            <nav id="floating-menu" class="floating-menu" aria-label="القائمة الرئيسية" data-i18n-aria-label="menuLabel" hidden>
+              <button id="about-open" class="menu-item" type="button"><span class="menu-icon">i</span><span data-i18n="aboutMenu">من نحن</span></button>
+              <button id="upload-open" class="menu-item" type="button"><span class="menu-icon">↑</span><span data-i18n="scanFileMenu">رفع بيانات المخزون</span></button>
+              <a class="menu-item" href="mailto:mohamedhhassan028@gmail.com?subject=Talabat%20Product%20Scanner"><span class="menu-icon">@</span><span data-i18n="contactMenu">تواصل معنا</span></a>
+              <p class="menu-note" data-i18n="menuNote">ملفك يُقرأ على جهازك ولا يُرفع إلى خادم.</p>
+            </nav>
+          </div>
+        </div>
+        <input id="csv-upload" type="file" accept=".csv,text/csv" hidden />
+      </header>
+
+      <main>
+        <section class="search-section" aria-labelledby="page-title">
+          <div class="intro-copy">
+            <p class="eyebrow"><span>01</span> <span data-i18n="eyebrow">بحث سريع عن المنتج</span></p>
+            <h1 id="page-title"><span class="headline-line" data-i18n="headlineFirst">كل كود،</span><span class="headline-accent" data-i18n="headlineSecond">في مكانه.</span></h1>
+            <p class="intro-description" data-i18n="introDescription">اكتب SKU أو امسحه بقارئ الأكواد، وهتظهر بيانات المنتج وأكواد المسح فورًا.</p>
+          </div>
+
+          <form id="search-form" class="search-form" autocomplete="off">
+            <label for="sku-input"><span data-i18n="skuLabel">رقم الصنف</span><span>SKU</span></label>
+            <div class="input-wrap">
+              <span class="search-symbol" aria-hidden="true">⌕</span>
+              <input id="sku-input" name="sku" type="search" inputmode="numeric" placeholder="مثال: 300719" data-i18n-placeholder="skuPlaceholder" autofocus aria-describedby="search-hint" />
+              <button id="clear-button" class="clear-button" type="button" aria-label="مسح البحث" title="مسح" data-i18n-aria-label="clearLabel" data-i18n-title="clearLabel">×</button>
+            </div>
+            <p id="search-hint" class="search-hint" data-i18n="searchHint">ابدأ الكتابة أو استخدم قارئ الأكواد. البحث يتم تلقائيًا.</p>
+          </form>
+        </section>
+
+        <section id="result-area" class="result-area" aria-live="polite" aria-atomic="true">
+          <div id="empty-state" class="empty-state">
+            <div class="empty-orbit" aria-hidden="true"><span>SKU</span><i></i></div>
+            <div>
+              <p class="empty-title" data-i18n="emptyTitle">جاهز للبحث</p>
+              <p class="empty-copy" data-i18n="emptyCopy">النتيجة هتظهر هنا بمجرد إدخال رقم الصنف.</p>
+            </div>
+            <span class="empty-index">01 / 01</span>
+          </div>
+          <article id="product-result" class="product-result" hidden>
+            <div class="product-heading">
+              <div>
+                <p class="eyebrow result-eyebrow"><span data-i18n="productLabel">المنتج</span><span id="result-sku"></span></p>
+                <h2 id="result-name"></h2>
+              </div>
+              <span class="found-badge"><span class="live-dot"></span><span data-i18n="foundBadge">تم العثور عليه</span></span>
+            </div>
+
+            <div class="code-mode" role="group" aria-label="نوع الكود" data-i18n-aria-label="codeTypeLabel">
+              <button class="code-mode-button is-selected" type="button" data-code-type="barcode" aria-pressed="true" data-i18n="barcodeTab">الباركود</button>
+              <button class="code-mode-button" type="button" data-code-type="qr" aria-pressed="false" data-i18n="qrTab">QR Code</button>
+            </div>
+            <div class="codes-grid">
+              <section class="code-panel barcode-panel" aria-labelledby="barcode-heading">
+                <div class="panel-heading">
+                  <div>
+                    <p class="panel-kicker">CODE 128</p>
+                    <h3 id="barcode-heading" data-i18n="barcodeTab">الباركود</h3>
+                  </div>
+                  <span class="panel-number">A</span>
+                </div>
+                <div class="barcode-frame"><svg id="barcode"></svg></div>
+                <p id="barcode-value" class="code-value"></p>
+                <p id="barcode-note" class="barcode-note" hidden data-i18n="barcodeFallback">الباركود غير موجود في الملف؛ الكود هنا مبني على SKU.</p>
+              </section>
+
+              <section class="code-panel qr-panel" aria-labelledby="qr-heading">
+                <div class="panel-heading">
+                  <div>
+                    <p class="panel-kicker">SCAN READY</p>
+                    <h3 id="qr-heading" data-i18n="qrTab">QR Code</h3>
+                  </div>
+                  <span class="panel-number">B</span>
+                </div>
+                <div class="qr-frame"><img id="qr-code" alt="QR code للمنتج" data-i18n-alt="qrAlt" /></div>
+                <p class="code-value" data-i18n="qrHint">امسح الكود لقراءة القيمة المعروضة</p>
+              </section>
+            </div>
+
+            <details class="data-details">
+              <summary data-i18n="detailsSummary">عرض بيانات الملف كاملة</summary>
+              <dl id="product-details"></dl>
+            </details>
+
+            <div class="result-footer">
+              <p><span class="footer-mark">✓</span> <span data-i18n="scanReady">الكود جاهز للمسح</span></p>
+              <button id="print-button" class="print-button" type="button"><span aria-hidden="true">▤</span> <span data-i18n="printButton">طباعة الكود</span></button>
+            </div>
+          </article>
+          <div id="not-found" class="not-found" hidden>
+            <span class="not-found-mark">?</span>
+            <div><p class="empty-title" data-i18n="notFoundTitle">الصنف مش موجود</p><p class="empty-copy" data-i18n="notFoundCopy">راجع رقم SKU أو حمّل ملف الأصناف الصحيح.</p></div>
+          </div>
+          <div id="load-error" class="load-error" hidden></div>
+        </section>
+
+        <footer class="page-footer">
+          <span>TALABAT</span>
+          <span class="footer-center"><span data-i18n="footerProductLookup">بحث المنتجات</span><i></i><span data-i18n="footerCodeStation">محطة الأكواد</span></span>
+          <span data-i18n="footerTagline">ببساطة للاستخدام اليومي</span>
+          <p class="footer-copyright" data-i18n="footerCopyright">جميع الحقوق محفوظة لصالح محمد هلال</p>
+        </footer>
+      </main>
+    </div>
+    <dialog id="about-dialog" class="about-dialog" aria-labelledby="about-title">
+      <div class="dialog-head">
+        <div><span class="dialog-kicker">TALABAT / CODE STATION</span><h2 id="about-title" data-i18n="aboutTitle">من نحن</h2></div>
+        <button id="about-close" class="dialog-close" type="button" aria-label="إغلاق" data-i18n-aria-label="closeDialogLabel">×</button>
+      </div>
+      <p data-i18n="aboutIntro">تم إنشاء الموقع بواسطة محمد هلال في فرع المقطم 1.</p>
+      <p data-i18n="aboutPurpose">بدأت فكرته لتسهيل البحث عن منتجات الباريستا وEveryday ومسح أكوادها، وتقليل الوقت اللازم لتجهيز الطلبات.</p>
+      <div class="branch-details"><span data-i18n="branchLabel">الفرع حسب بيانات المخزن</span><strong data-i18n="branchName">المقطم 1</strong><code>EG_Cairo_DS_6</code></div>
+      <div class="legal-note">
+        <p data-i18n="legalNotice">لو عندك ملاحظة قانونية أو طلب حذف محتوى، راسلني وسأراجعه وأزيل المحتوى عند اللزوم.</p>
+        <a href="mailto:mohamedhhassan028@gmail.com">mohamedhhassan028@gmail.com</a>
+      </div>
+    </dialog>
+    <dialog id="setup-dialog" class="setup-dialog" aria-labelledby="setup-title">
+      <div class="setup-topline">
+        <span class="setup-brand"><span class="setup-brand-mark">T</span><span data-i18n="setupBrand">TALABAT CODE STATION</span></span>
+        <button id="setup-language-toggle" class="setup-language-toggle" type="button" data-i18n-aria-label="languageButtonLabel" aria-label="التبديل إلى الإنجليزية">EN</button>
+      </div>
+      <div class="setup-icon" aria-hidden="true"><span>↓</span><i></i></div>
+      <p class="setup-step" data-i18n="setupStep">إعداد سريع · خطوة 1 من 1</p>
+      <h2 id="setup-title" data-i18n="setupTitle">أهلاً بك في محطة طلبات للأكواد</h2>
+      <p class="setup-lead" data-i18n="setupLead">حوّل بيانات المخزون إلى بحث سريع وأكواد جاهزة للمسح.</p>
+      <div class="setup-requirement">
+        <span class="setup-requirement-mark" aria-hidden="true">1</span>
+        <p data-i18n="setupRequirement">للبدء، ارفع ملف بيانات المخزون بصيغة CSV.</p>
+      </div>
+      <button id="setup-upload" class="setup-upload" type="button"><span aria-hidden="true">↑</span><span data-i18n="setupChooseFile">اختيار ملف CSV</span></button>
+      <p class="setup-drop-hint" data-i18n="setupDropHint">أو اسحب الملف وأفلته هنا</p>
+      <p id="setup-status" class="setup-status" role="status" aria-live="polite"></p>
+      <p class="setup-privacy"><span aria-hidden="true">⌑</span><span data-i18n="setupPrivacy">ملفك يُقرأ ويُحفظ على هذا الجهاز فقط، ولا يُرسل إلى خادم. يمكنك استبداله لاحقًا من القائمة.</span></p>
+      <p class="setup-format" data-i18n="setupFormat">يدعم ملفات CSV التي تحتوي على SKU واسم المنتج، والباركود اختياري.</p>
+    </dialog>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
